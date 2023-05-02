@@ -47,6 +47,8 @@ const StepTwo: React.FC<LoginScreenProps<RoutersName.StepTwo>> = ({
     try {
       const globalFormData = store.getState().login;
 
+      // i may perform revalidate here and throw error
+
       const result: any = await fetchLogin(globalFormData);
       if (result?.error) {
         throw result.error;
