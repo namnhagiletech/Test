@@ -6,6 +6,8 @@ import Input from '../../../components/Form/Input';
 import {UseWatchProps, useForm, useFormState} from 'react-hook-form';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
+import {changeName} from '../../../store/login';
+import {useDispatch} from 'react-redux';
 
 const schema = yup.object().shape({
   name: yup.string().required(),
@@ -39,6 +41,8 @@ const StepOne: React.FC<LoginScreenProps<RoutersName.StepOne>> = ({
     navigation.navigate(RoutersName.StepTwo);
   };
 
+  const dispatch = useDispatch();
+
   const {handleSubmit, control} = useForm({
     resolver: yupResolver(schema),
     mode: 'onChange',
@@ -46,7 +50,14 @@ const StepOne: React.FC<LoginScreenProps<RoutersName.StepOne>> = ({
 
   return (
     <View style={styles.view}>
-      <Input label="Name" name="name" control={control} />
+      <Input
+        label="Name"
+        name="name"
+        control={control}
+        onChangeText={value => {
+          dispatch(changeName(value));
+        }}
+      />
       <ButtonNext
         name="name"
         onPress={handleSubmit(handleClick)}
@@ -63,29 +74,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 16,
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  input: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 4,
-    height: 48,
-    fontSize: 12,
-    padding: 10,
-    textAlign: 'left',
-    alignItems: 'center',
-  },
-  error: {
-    color: 'red',
-  },
-  inputError: {
-    borderColor: 'red',
-    color: 'red',
-  },
-  inputTouched: {
-    borderColor: 'green',
   },
 });

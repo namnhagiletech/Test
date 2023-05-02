@@ -4,6 +4,7 @@ import StepOne from '../../screens/Login/StepOne';
 import StepTwo from '../../screens/Login/StepTwo';
 import {LoginStackParams} from './types';
 import {RoutersName} from '../routersName';
+import SuccessPage from '../../screens/Login/SuccessPage';
 
 const LoginStack = createNativeStackNavigator<LoginStackParams>();
 
@@ -18,6 +19,11 @@ const LoginStackScreen = () => {
       <LoginStack.Screen
         name={RoutersName.StepTwo}
         component={StepTwo}
+        options={{headerShown: false}}
+      />
+      <LoginStack.Screen
+        name={RoutersName.SuccessPage}
+        component={SuccessPage}
         options={{headerShown: false}}
       />
     </LoginStack.Navigator>

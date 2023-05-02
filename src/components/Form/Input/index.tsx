@@ -14,11 +14,12 @@ const Input: React.FC<TextInputProps & UseControllerProps & InputProps> = ({
   shouldUnregister,
   defaultValue,
   label,
+  onChangeText,
   ...props
 }) => {
   const {
     field,
-    fieldState: {invalid, isTouched},
+    fieldState: {invalid, isTouched, error},
   } = useController({name, control, rules, shouldUnregister, defaultValue});
 
   return (
@@ -39,9 +40,13 @@ const Input: React.FC<TextInputProps & UseControllerProps & InputProps> = ({
         onBlur={field.onBlur}
         value={field.value}
         ref={field.ref}
-        onChangeText={text => field.onChange(text)}
+        onChangeText={text => {
+          field.onChange(text);
+          onChangeText && onChangeText(text);
+        }}
         {...props}
       />
+      {invalid && <Text style={styles.error}>{error?.message}</Text>}
     </View>
   );
 };
@@ -70,6 +75,7 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
+    marginVertical: 8,
   },
   inputError: {
     borderColor: 'red',

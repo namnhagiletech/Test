@@ -6,6 +6,9 @@ import Input from '../../../components/Form/Input';
 import {UseWatchProps, useForm, useFormState} from 'react-hook-form';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
+import {changeEmail, useLoginMutation} from '../../../store/login';
+import store from '../../../store';
+import {useDispatch} from 'react-redux';
 
 const schema = yup.object().shape({
   email: yup.string().email().required(),
@@ -14,12 +17,14 @@ const schema = yup.object().shape({
 type ButtonSubmitProps = {
   name: string;
   onPress: () => void;
+  isLoading: boolean;
 };
 
 const ButtonSubmit: React.FC<ButtonSubmitProps & UseWatchProps> = ({
   name,
   onPress,
   control,
+  isLoading,
 }) => {
   const {errors} = useFormState({name, control});
 
@@ -27,14 +32,33 @@ const ButtonSubmit: React.FC<ButtonSubmitProps & UseWatchProps> = ({
     <Button
       title="Submit"
       onPress={onPress}
-      disabled={Object.keys(errors).length > 0}
+      disabled={isLoading || Object.keys(errors).length > 0}
     />
   );
 };
 
-const StepTwo: React.FC<LoginScreenProps<RoutersName.StepTwo>> = () => {
-  const handleClick = (values: any) => {
-    Alert.alert(JSON.stringify(values));
+const StepTwo: React.FC<LoginScreenProps<RoutersName.StepTwo>> = ({
+  navigation,
+}) => {
+  const [fetchLogin, {isLoading}] = useLoginMutation();
+  const dispatch = useDispatch();
+
+  const handleClick = async () => {
+    try {
+      const globalFormData = store.getState().login;
+
+      const result: any = await fetchLogin(globalFormData);
+      if (result?.error) {
+        throw result.error;
+      }
+      // navigate to success page
+      navigation.push(RoutersName.SuccessPage, {
+        email: result.data.email,
+        name: result.data.name,
+      });
+    } catch (error) {
+      Alert.alert(JSON.stringify(error));
+    }
   };
 
   const {handleSubmit, control} = useForm({
@@ -44,9 +68,17 @@ const StepTwo: React.FC<LoginScreenProps<RoutersName.StepTwo>> = () => {
 
   return (
     <View style={styles.view}>
-      <Input label="Email" name="email" control={control} />
+      <Input
+        label="Email"
+        name="email"
+        control={control}
+        onChangeText={value => {
+          dispatch(changeEmail(value));
+        }}
+      />
       <ButtonSubmit
         name="email"
+        isLoading={isLoading}
         onPress={handleSubmit(handleClick)}
         control={control}
       />
@@ -61,29 +93,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 16,
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  input: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 4,
-    height: 48,
-    fontSize: 12,
-    padding: 10,
-    textAlign: 'left',
-    alignItems: 'center',
-  },
-  error: {
-    color: 'red',
-  },
-  inputError: {
-    borderColor: 'red',
-    color: 'red',
-  },
-  inputTouched: {
-    borderColor: 'green',
   },
 });
